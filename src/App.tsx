@@ -54,7 +54,7 @@ function App() {
       setIsSubmitting(true);
       try {
         const response = await fetch(
-          `https://messold-form.vercel.app/api/v1/add/question`,
+          `https://form-backend-delta.vercel.app/api/v1/add/question`,
           {
             method: "POST",
             headers: {
