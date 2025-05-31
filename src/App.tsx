@@ -2,13 +2,14 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ArrowLeft, Check } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { Textarea } from "./components/ui/textarea";
 import questionbankData from "./data/questionBank.json";
+import StartScreen from "./components/others/StartScreen";
 
 interface Question {
   id: number;
@@ -23,6 +24,9 @@ interface QuestionAnswer {
 }
 
 function App() {
+  // Add state for start screen
+  const [showStartScreen, setShowStartScreen] = useState(true);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<QuestionAnswer[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState("");
@@ -33,6 +37,23 @@ function App() {
   const questions = questionbankData as Question[];
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
+
+  // Handle start screen
+  const handleStart = () => {
+    setShowStartScreen(false);
+  };
+
+  // Handle Enter key press on start screen
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === "Enter" && showStartScreen) {
+        handleStart();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [showStartScreen]);
 
   const handleNext = async () => {
     if (!currentAnswer.trim()) return;
@@ -54,7 +75,7 @@ function App() {
       setIsSubmitting(true);
       try {
         const response = await fetch(
-          `https://form-backend-delta.vercel.app/api/v1/add/question`,
+          `https://form-backend-tawny.vercel.app/api/v1/add/question`,
           {
             method: "POST",
             headers: {
@@ -112,6 +133,17 @@ function App() {
       setCurrentAnswer(option);
     }
   };
+
+  // Show start screen first
+  if (showStartScreen) {
+    return (
+      <StartScreen
+        onStart={handleStart}
+        description="Help us understand your business needs better. This consultation form will help us provide you with the best solutions for your digital presence."
+        buttonText="Get started"
+      />
+    );
+  }
 
   if (isSubmitted) {
     return (
